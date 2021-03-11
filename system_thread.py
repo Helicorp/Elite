@@ -100,7 +100,7 @@ def inject(__message):
             # Do what you want with the data...
             # Have fun !
                 if __json['message']['event'] == "FSDJump":
-                    mycursor = mydb.cursor()
+                    mycursor = mydb.cursor(buffered=True)
                     date = datetime.datetime.strptime(__json['message']['timestamp'], '%Y-%m-%dT%H:%M:%SZ')
                     __json['message']['SystemGovernment'] = __json['message']['SystemGovernment'].replace('$government_', '')
                     __json['message']['SystemGovernment'] = __json['message']['SystemGovernment'].replace(';', '')
@@ -117,7 +117,7 @@ def inject(__message):
                     __json['message']['SystemSecondEconomy'] = __json['message']['SystemSecondEconomy'].replace('$economy_', '')
                     __json['message']['SystemSecondEconomy'] = __json['message']['SystemSecondEconomy'].replace(';', '')
 
-                    __json['message']['StarSystem'] = __json['message']['StarSystem'].replace("'", "\\\'")
+                    __json['message']['StarSystem'] = __json['message']['StarSystem'].replace("'", "\\'")
 
                     sql = "SELECT count(*), MAX(debut), StarSystem, SystemAllegiance, SystemEconomy, SystemGovernment FROM System WHERE SystemAdress = '" + str(__json['message']['SystemAddress']) + "' AND fin >= NOW()"
                     mycursor.execute(sql)
@@ -132,7 +132,7 @@ def inject(__message):
                             mycursor.execute(sql)
                             lastSystemInsert = mycursor.fetchone()
                         else :
-                            __json['message']['SystemFaction']['Name'] = __json['message']['SystemFaction']['Name'].replace("'", "\\\'")
+                            __json['message']['SystemFaction']['Name'] = __json['message']['SystemFaction']['Name'].replace("'", "\\'")
                             val = (__json['message']['StarSystem'], __json['message']['SystemAllegiance'], __json['message']['SystemEconomy'], __json['message']['SystemGovernment'], __json['message']['SystemSecurity'], __json['message']['SystemFaction']['Name'], __json['message']['SystemSecondEconomy'], __json['message']['StarPos'][0], __json['message']['StarPos'][1], __json['message']['StarPos'][2], date, __json['message']['SystemAddress'])
                             mycursor.execute(sql, val)
                             mydb.commit()
@@ -143,21 +143,32 @@ def inject(__message):
                     elif int(myresult[0]) != 0:
 
                         print('donnee doublons recu')
+                        
+                        sql = "SELECT * FROM System WHERE SystemAdress = '" + str(__json['message']['SystemAddress']) + "' AND Fin >= NOW()"
+                        mycursor.execute(sql)
+                        dernierEnregistrement = mycursor.fetchone()
+
+                        if "SystemFaction" not in __json['message'].keys() :
+                            if dernierEnregistrement[1] != __json['message']['StarSystem'].lower() or dernierEnregistrement[2] != __json['message']['SystemAllegiance'].lower() or dernierEnregistrement[3] != __json['message']['SystemEconomy'].lower() or dernierEnregistrement[4] != __json['message']['SystemGovernment'].lower() or dernierEnregistrement[5] != __json['message']['SystemSecurity'].lower():
+                                print("update recu sans faction et une info ne correspond pas")
+                                print(str(dernierEnregistrement[1]), ' != ', str(__json['message']['StarSystem'].lower()))
+                                print(str(dernierEnregistrement[2]), ' != ', str(__json['message']['SystemAllegiance'].lower()))
+                                print(str(dernierEnregistrement[3]), ' != ', str(__json['message']['SystemEconomy'].lower()))
+                                print(str(dernierEnregistrement[4]), ' != ', str(__json['message']['SystemGovernment'].lower()))
+                                print(str(dernierEnregistrement[5]), ' != ', str(__json['message']['SystemSecurity'].lower()))
+                        else :
+                            if dernierEnregistrement[1] != __json['message']['StarSystem'].lower() or dernierEnregistrement[2] != __json['message']['SystemAllegiance'].lower() or dernierEnregistrement[3] != __json['message']['SystemEconomy'].lower() or dernierEnregistrement[4] != __json['message']['SystemGovernment'].lower() or dernierEnregistrement[5] != __json['message']['SystemSecurity'].lower() or dernierEnregistrement[9] != __json['message']['SystemFaction']['Name'].lower():
+                                print("update recu avec faction et une info ne correspond pas")
+                                print(str(dernierEnregistrement[1]), ' != ', str(__json['message']['StarSystem'].lower()))
+                                print(str(dernierEnregistrement[2]), ' != ', str(__json['message']['SystemAllegiance'].lower()))
+                                print(str(dernierEnregistrement[3]), ' != ', str(__json['message']['SystemEconomy'].lower()))
+                                print(str(dernierEnregistrement[4]), ' != ', str(__json['message']['SystemGovernment'].lower()))
+                                print(str(dernierEnregistrement[5]), ' != ', str(__json['message']['SystemSecurity'].lower()))
+                                print(str(dernierEnregistrement[9]), ' != ', str(__json['message']['SystemFaction']['Name'].lower()))
+
                         sql = "SELECT idSystem FROM System WHERE SystemAdress = '" + str(__json['message']['SystemAddress']) + "' AND Fin >= NOW()"
                         mycursor.execute(sql)
-                        lastSystemInsert = mycursor.fetchone()
-
-
-                        """if myresult[1] < date:
-                            if myresult[2] != __json['message']['StationFaction']['Name'].lower() or myresult[3] != __json['message']['StationGovernment'].lower() or myresult[4] != __json['message']['StarSystem'].lower():
-                                sql = "UPDATE Market SET Fin = Now() WHERE idMarket = " + str(__json['message']['MarketID']) + " AND Fin = '9999-12-31'"
-                                #print(sql)
-                                mycursor.execute(sql)
-                                mydb.commit()
-                                sql = "INSERT INTO Market (idMarket, StationName, StationType, StationSystem, StationAllegiance, StationGovernement, debut) VALUES (%s, LOWER(%s), LOWER(%s), LOWER(%s), LOWER(%s), LOWER(%s), %s)"
-                                val = (__json['message']['MarketID'], __json['message']['StationName'], __json['message']['StationType'], __json['message']['StarSystem'], __json['message']['StationFaction']['Name'],__json['message']['StationGovernment'], date)
-                                mycursor.execute(sql, val)
-                                mydb.commit() """
+                        lastSystemInsert = mycursor.fetchone()    
 
                     sql = "SELECT count(*) FROM User WHERE UploaderID = '" + str(__json['header']['uploaderID']) +"'"
                     mycursor.execute(sql)
