@@ -15,8 +15,8 @@ import pandas as pd
 import mysql.connector
 
 mydb = mysql.connector.connect(
-        host="localhost",
-        port="52000",
+        host="192.168.1.29",
+        port="3306",
         user="utilisateur",
         password="root",
         database="elite",
@@ -37,7 +37,7 @@ print(df2_mysql.sample())
 
 ax = fig.add_subplot(111, projection='3d')
 
-ax.scatter(df2_mysql["longitude"],df2_mysql[["latitude"]],df2_mysql[["altitude"]])
+ax.scatter(df2_mysql["Longitude"],df2_mysql[["Latitude"]],df2_mysql[["Altitude"]])
 
 ax.set_xlabel('X Label')
 ax.set_ylabel('Y Label')
