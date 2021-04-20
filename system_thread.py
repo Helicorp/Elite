@@ -197,17 +197,17 @@ def SAASignalsFound(__json,mydb):
 
 
 def inject(__message):
-        mydb = mysql.connector.connect(
-        host="192.168.1.29",
-        port="3306",
-        user="utilisateur",
-        password="root",
-        database="elite"
-        )
         __message   = zlib.decompress(__message)
         __json      = simplejson.loads(__message)
         __converted = False
         if __json['$schemaRef'] == 'https://eddn.edcd.io/schemas/journal/1' + ('/test' if (__debugEDDN == True) else ''):
+            mydb = mysql.connector.connect(
+            host="192.168.1.29",
+            port="3306",
+            user="utilisateur",
+            password="root",
+            database="elite"
+            )
             __authorised = False
             __excluded   = False
             if __json['header']['softwareName'] in __authorisedSoftwares:

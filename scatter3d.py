@@ -28,7 +28,7 @@ fig = plt.figure()
 # For each set of style and range settings, plot n random points in the box
 # defined by x in [23, 32], y in [0, 100], z in [zlow, zhigh].
 
-df_mysql = pd.read_sql('select * from elite.System;', con=mydb)  
+df_mysql = pd.read_sql('select * from elite.System WHERE FIN > NOW();', con=mydb)  
 df2_mysql = pd.DataFrame(df_mysql)  
 print ('loaded dataframe from MySQL. records:', len(df2_mysql))
 mydb.close()
