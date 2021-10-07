@@ -1,0 +1,11 @@
+FROM python:3
+
+WORKDIR /usr/src/app
+
+RUN pip install zmq \
+&& pip install mysql-connector \
+&& pip install simplejson
+
+COPY commodity_thread.py .
+
+CMD [ "python", "../python/commodity_thread.py" ]

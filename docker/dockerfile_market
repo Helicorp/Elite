@@ -1,0 +1,11 @@
+FROM python:3
+
+WORKDIR /usr/src/app
+
+RUN pip install zmq \
+&& pip install mysql-connector \
+&& pip install simplejson
+
+COPY market_thread.py .
+
+CMD [ "python", "../python/market_thread.py" ]
